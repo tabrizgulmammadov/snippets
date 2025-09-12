@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/tabriz-gulmammadov/snippetbox/internal/models"
-	"github.com/tabriz-gulmammadov/snippetbox/internal/validator"
+	"github.com/tabriz-gulmammadov/snippets/internal/models"
+	"github.com/tabriz-gulmammadov/snippets/internal/validator"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -88,6 +88,8 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		app.serverError(w, r, err)
 		return
 	}
+
+	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
 
 	http.Redirect(w, r, fmt.Sprintf("/snippets/%d/view", id), http.StatusSeeOther)
 }

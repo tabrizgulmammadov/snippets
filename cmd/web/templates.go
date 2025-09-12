@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/tabriz-gulmammadov/snippetbox/internal/models"
+	"github.com/tabriz-gulmammadov/snippets/internal/models"
 )
 
 type templateData struct {
@@ -14,11 +14,13 @@ type templateData struct {
 	Snippet     models.Snippet
 	Snippets    []models.Snippet
 	Form        any
+	Flash       string
 }
 
 func (app *application) newTemplateData(r *http.Request) templateData {
 	return templateData{
 		CurrentYear: time.Now().Year(),
+		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
 	}
 }
 
