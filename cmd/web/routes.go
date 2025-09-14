@@ -10,16 +10,23 @@ func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("GET /static/", http.StripPrefix("/static/", fileServer))
+	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
 
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
 	mux.Handle("GET /snippets/{id}/view", dynamic.ThenFunc(app.snippetView))
-	mux.Handle("GET /snippets/create", dynamic.ThenFunc(app.snippetCreate))
-	mux.Handle("POST /snippets", dynamic.ThenFunc(app.snippetCreatePost))
+	mux.Handle("GET /users/signup", dynamic.ThenFunc(app.userSignup))
+	mux.Handle("POST /users/signup", dynamic.ThenFunc(app.userSignupPost))
+	mux.Handle("GET /users/login", dynamic.ThenFunc(app.userLogin))
+	mux.Handle("POST /users/login", dynamic.ThenFunc(app.userLoginPost))
+
+	protected := dynamic.Append(app.requireAuthentication)
+
+	mux.Handle("GET /snippets/create", protected.ThenFunc(app.snippetCreate))
+	mux.Handle("POST /snippets/create", protected.ThenFunc(app.snippetCreatePost))
+	mux.Handle("POST /users/logout", protected.ThenFunc(app.userLogoutPost))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
-
 	return standard.Then(mux)
 }
